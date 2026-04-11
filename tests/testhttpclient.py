@@ -1,6 +1,6 @@
 import pytest
 
-from secure_app.http_client import OutboundUrlPolicy, validate_outbound_url
+from secure_app.httpclient import OutboundUrlPolicy, validate_outbound_url
 
 
 def test_validate_outbound_url_allowlist_host() -> None:

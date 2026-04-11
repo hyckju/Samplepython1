@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ipaddress
 from dataclasses import dataclass
-from typing import Iterable
 from urllib.parse import SplitResult, urlsplit
 
 
@@ -31,11 +30,9 @@ def validate_outbound_url(url: str, policy: OutboundUrlPolicy) -> SplitResult:
 
     host_lc = host.lower().rstrip(".")
 
-    # Disallow localhost and other obvious local names unless explicitly allowlisted.
     if host_lc in {"localhost", "localhost.localdomain"} and host_lc not in policy.allowed_hosts:
         raise ValueError("localhost not allowed")
 
-    # If host is an IP literal, block private/link-local/etc unless explicitly allowlisted.
     try:
         ip = ipaddress.ip_address(host_lc)
     except ValueError:
@@ -54,7 +51,6 @@ def validate_outbound_url(url: str, policy: OutboundUrlPolicy) -> SplitResult:
         if host_lc not in policy.allowed_hosts:
             raise ValueError("IP host must be explicitly allowlisted")
     else:
-        # Without DNS resolution (which itself can be dangerous), enforce allowlist strictly.
         if host_lc not in policy.allowed_hosts:
             raise ValueError("host not in allowlist")
 

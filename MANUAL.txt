@@ -11,12 +11,12 @@ Secure App Sample Manual
 
 2) 폴더/파일 구조
 - src/secure_app/
-  - __main__.py        : 모듈 실행 진입점 (python -m secure_app)
+  - main.py            : (참고) 실행용 모듈 파일
   - cli.py             : CLI 파서/서브커맨드(add/list/demo)
   - storage.py         : 노트 저장(JSON) + 경로 탐색 방지(safe_join)
   - validation.py      : 입력 정규화/검증(길이 제한, NFKC, NUL 제거 등)
   - crypto.py          : 안전한 비밀번호 해시(PBKDF2-HMAC-SHA256)
-  - http_client.py     : SSRF 완화용 아웃바운드 URL 검증(https + allowlist)
+  - httpclient.py      : SSRF 완화용 아웃바운드 URL 검증(https + allowlist)
   - demo.py            : 더미(가짜) 민감정보 예시를 런타임 생성 + 마스킹/해시 출력
 
 - tests/
@@ -27,9 +27,8 @@ Secure App Sample Manual
 - requirements.txt     : 테스트/빌드 툴 버전 고정
 
 
-3) 실행 방식 (main 파일 실행)
-이 프로젝트의 main(진입점)은 src/secure_app/__main__.py 입니다.
-실행은 “명령(subcommand)”를 반드시 함께 줘야 합니다.
+3) 실행 방식
+이 프로젝트는 CLI(명령줄 앱)이며, 실행은 “명령(subcommand)”를 반드시 함께 줘야 합니다.
 
 A. 명령 없이 실행하면
 - 사용법(usage) + 오류 메시지 출력 후 종료합니다.
@@ -117,7 +116,7 @@ C. add/list 실행 (로컬 JSON 노트 저장/조회)
 9) 자주 묻는 질문
 Q. crypto.py만 실행하면 되나요?
 - 아니요. crypto.py는 라이브러리 모듈이라 단독 실행 파일이 아닙니다.
-- python -m secure_app (또는 secure-app 엔트리포인트)로 실행합니다.
+- secure-app 엔트리포인트(설치 후) 또는 모듈 실행 방식으로 실행합니다.
 
 Q. demo에 ‘민감정보’가 들어가는데 안전한가요?
 - 실제 존재 가능한 값이 아니라 예약 도메인(example.com)과 가상용 전화번호 대역을 사용합니다.

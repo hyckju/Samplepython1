@@ -23,7 +23,9 @@ package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
+namespaces = true
 
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]
+python_files = ["test*.py"]
