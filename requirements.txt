@@ -1,0 +1,6 @@
+# Runtime dependencies: (none) — stdlib only.
+# Dev/test/build tools (pinned):
+pytest==8.2.2
+build==1.2.1
+setuptools==70.0.0
+wheel==0.43.0

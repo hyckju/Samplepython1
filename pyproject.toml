@@ -1,0 +1,29 @@
+[build-system]
+requires = [
+  "setuptools==70.0.0",
+  "wheel==0.43.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "secure-app-sample"
+version = "0.1.0"
+description = "Small Python sample that applies common security hardening patterns (input validation, safe storage, safe password hashing, SSRF-safe URL validation)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "UNLICENSED" }
+authors = [{ name = "sample" }]
+dependencies = []
+
+[project.scripts]
+secure-app = "secure_app.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]

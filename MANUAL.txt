@@ -1,0 +1,124 @@
+Secure App Sample Manual
+
+1) 프로젝트 목적
+- 파이썬으로 작은 CLI 앱 예제를 제공하며, 대표적인 취약 패턴을 피하는(보완하는) 코딩 스타일을 보여줍니다.
+- 테스트(pytest)와 빌드(python -m build)가 가능하도록 구성되어 있습니다.
+
+중요한 주의사항
+- “취약점 0개”를 절대적으로 보장할 수는 없습니다. 다만 이 프로젝트는 대표적인 취약 패턴을 의도적으로 피하도록 설계되어 있습니다.
+- 실제 개인정보/실제 시크릿은 절대 포함하지 않습니다.
+
+
+2) 폴더/파일 구조
+- src/secure_app/
+  - __main__.py        : 모듈 실행 진입점 (python -m secure_app)
+  - cli.py             : CLI 파서/서브커맨드(add/list/demo)
+  - storage.py         : 노트 저장(JSON) + 경로 탐색 방지(safe_join)
+  - validation.py      : 입력 정규화/검증(길이 제한, NFKC, NUL 제거 등)
+  - crypto.py          : 안전한 비밀번호 해시(PBKDF2-HMAC-SHA256)
+  - http_client.py     : SSRF 완화용 아웃바운드 URL 검증(https + allowlist)
+  - demo.py            : 더미(가짜) 민감정보 예시를 런타임 생성 + 마스킹/해시 출력
+
+- tests/
+  - conftest.py        : src 레이아웃을 테스트에서 import 가능하게 설정
+  - test_*.py          : 기능/보안 포인트에 대한 테스트
+
+- pyproject.toml       : 패키징/엔트리포인트/pytest 설정
+- requirements.txt     : 테스트/빌드 툴 버전 고정
+
+
+3) 실행 방식 (main 파일 실행)
+이 프로젝트의 main(진입점)은 src/secure_app/__main__.py 입니다.
+실행은 “명령(subcommand)”를 반드시 함께 줘야 합니다.
+
+A. 명령 없이 실행하면
+- 사용법(usage) + 오류 메시지 출력 후 종료합니다.
+
+B. demo 실행 (가짜 개인정보/민감정보 예시 출력)
+- 런타임에 무작위로 생성하며, 출력은 마스킹/해시 처리되어 노출 위험을 줄입니다.
+- 실제 이메일/실제 전화번호/실제 비밀번호는 포함되지 않습니다.
+
+C. add/list 실행 (로컬 JSON 노트 저장/조회)
+- add: 노트 1개를 저장하고, 생성된 id를 출력합니다.
+- list: 저장된 노트들을 출력합니다.
+
+
+4) 빠른 시작 (Windows + WSL 터미널 기준)
+아래는 이 워크스페이스에 생성된 가상환경(.venv)을 사용하는 예시입니다.
+
+- demo 출력:
+  c:/Users/User/Desktop/-2-/.venv/Scripts/python.exe -m secure_app demo
+
+- 노트 추가:
+  c:/Users/User/Desktop/-2-/.venv/Scripts/python.exe -m secure_app add --text "hello"
+
+- 노트 목록:
+  c:/Users/User/Desktop/-2-/.venv/Scripts/python.exe -m secure_app list
+
+데이터 저장 위치
+- 기본 저장 폴더: ./data
+- 변경하려면: --data-dir 옵션 사용
+
+
+5) 테스트 실행
+- 전체 테스트 실행:
+  c:/Users/User/Desktop/-2-/.venv/Scripts/python.exe -m pytest
+
+테스트는 다음을 확인합니다.
+- 비밀번호 해시 생성/검증이 정상 동작
+- 입력 검증(빈 값/길이 제한 등)
+- 경로 탐색(path traversal) 차단
+- SSRF 완화용 URL 검증(https/allowlist/localhost 및 사설 IP 차단)
+- demo 출력이 마스킹되어 있고 JSON으로 파싱 가능
+
+
+6) 빌드(패키징) 실행
+- 빌드(권장):
+  c:/Users/User/Desktop/-2-/.venv/Scripts/python.exe -m build --no-isolation
+
+설명
+- 기본값(python -m build)은 격리 환경을 만들고 빌드 의존성을 설치하려고 시도할 수 있어,
+  네트워크/환경에 따라 시간이 오래 걸리거나 멈춘 것처럼 보일 수 있습니다.
+- 이 프로젝트는 build/setuptools/wheel을 venv에 설치해 둔 상태라 --no-isolation로도 빌드가 가능합니다.
+
+
+7) 보안 설계 포인트(대표 취약 패턴 완화)
+- 하드코딩 시크릿/실제 개인정보 없음
+  - demo는 런타임에 더미 값을 생성하고, 마스킹/해시 형태로만 출력합니다.
+
+- 안전한 비밀번호 저장(crypto.py)
+  - PBKDF2-HMAC-SHA256 사용
+  - salt를 랜덤 생성
+  - 반복 횟수(iterations) 최소 기준 적용
+  - 비교 시 hmac.compare_digest 사용(타이밍 공격 완화)
+
+- 입력 검증/정규화(validation.py)
+  - NFKC 정규화로 혼동 가능한 문자/폭 문제 완화
+  - NUL 제거
+  - 길이 제한 및 공백-only 입력 거부
+
+- 경로 탐색 방지(storage.py)
+  - safe_join에서 base_dir 밖으로 빠져나가는 경로를 차단
+  - JSON 저장은 원자적 쓰기(os.replace)로 부분 쓰기 위험 완화
+
+- SSRF 완화 방향(http_client.py)
+  - https만 허용(기본)
+  - 호스트 allowlist 강제
+  - localhost/사설 IP/특수 IP 차단
+  - (DNS 해석은 하지 않음) allowlist 기반 정책으로 단순/명확하게 제한
+
+
+8) 한계/확장 아이디어
+- 이 프로젝트는 교육/샘플 성격입니다.
+- 실제 서비스에서는 인증/권한, 로깅(민감정보 마스킹), 비밀키 관리(환경변수/시크릿 매니저),
+  네트워크 레벨 egress 제어, SAST/DAST, 의존성 취약점 스캔 등이 추가로 필요할 수 있습니다.
+
+
+9) 자주 묻는 질문
+Q. crypto.py만 실행하면 되나요?
+- 아니요. crypto.py는 라이브러리 모듈이라 단독 실행 파일이 아닙니다.
+- python -m secure_app (또는 secure-app 엔트리포인트)로 실행합니다.
+
+Q. demo에 ‘민감정보’가 들어가는데 안전한가요?
+- 실제 존재 가능한 값이 아니라 예약 도메인(example.com)과 가상용 전화번호 대역을 사용합니다.
+- 또한 출력은 마스킹/해시 형태로만 제공하며, 원문 비밀번호는 출력하지 않습니다.
