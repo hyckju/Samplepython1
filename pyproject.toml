@@ -13,10 +13,13 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "UNLICENSED" }
 authors = [{ name = "sample" }]
-dependencies = []
+dependencies = [
+  "fastapi==0.115.0",
+  "uvicorn==0.30.6",
+]
 
 [project.scripts]
-secure-app = "secure_app.cli:main"
+secure-app = "secure_app.api:main"
 
 [tool.setuptools]
 package-dir = { "" = "src" }

@@ -1,4 +1,8 @@
 # Runtime dependencies: (none) — stdlib only.
+fastapi==0.115.0
+uvicorn==0.30.6
+httpx==0.28.1
+
 # Dev/test/build tools (pinned):
 pytest==8.2.2
 build==1.2.1
